@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActionItem } from '../types';
 import { getGoogleCalendarUrl } from '../services/export';
 import { 
@@ -39,6 +39,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [showQuote, setShowQuote] = useState(false);
+
+  useEffect(() => {
+    setEditedTitle(item.title);
+  }, [item.title]);
 
   const isCompleted = item.status === 'done';
 

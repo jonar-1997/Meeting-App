@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActionItem, AmbiguityWarning } from '../types';
 import { AlertTriangle, Check, Copy, MessageSquare, User, X, Sparkles, Send } from 'lucide-react';
 
@@ -30,6 +30,18 @@ export const AmbiguityResolverModal: React.FC<AmbiguityResolverModalProps> = ({
   const [draftMessage, setDraftMessage] = useState<string>('');
   const [isDrafting, setIsDrafting] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (item && isOpen) {
+      setSelectedAssignee(item.assignee || 'Unassigned');
+      setCustomAssignee('');
+      setNewDueDate(item.dueDate || '');
+      setDeadlineText(item.deadlineLabel || '');
+      setDraftMessage('');
+      setIsDrafting(false);
+      setCopied(false);
+    }
+  }, [item, isOpen]);
 
   if (!isOpen || !item) return null;
 

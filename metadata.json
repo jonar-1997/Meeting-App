@@ -1,6 +1,6 @@
 {
   "name": "ActionDraft - Meeting Notes to Verified Action Items",
   "description": "Transform chaotic meeting notes into clean, verified personal to-do lists, team action items, deadline tracking, and one-click task manager exports.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

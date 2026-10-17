@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserProfile } from '../services/storage';
 import { X, User, Briefcase, Mail, Check } from 'lucide-react';
 
@@ -18,6 +18,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [name, setName] = useState(currentProfile.name);
   const [role, setRole] = useState(currentProfile.role);
   const [email, setEmail] = useState(currentProfile.email);
+
+  useEffect(() => {
+    if (isOpen) {
+      setName(currentProfile.name);
+      setRole(currentProfile.role);
+      setEmail(currentProfile.email);
+    }
+  }, [currentProfile, isOpen]);
 
   if (!isOpen) return null;
 

@@ -27,9 +27,9 @@ export const DeadlineTimeline: React.FC<DeadlineTimelineProps> = ({
 }) => {
   const [filterPersonal, setFilterPersonal] = useState(false);
 
-  // Group items by timeline urgency
+  // Group items by timeline urgency using local calendar dates
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const items = filterPersonal
     ? meeting.actionItems.filter(i => i.isPersonal)
@@ -46,10 +46,15 @@ export const DeadlineTimeline: React.FC<DeadlineTimelineProps> = ({
       return;
     }
 
-    const itemDate = new Date(item.dueDate);
-    const diffDays = Math.ceil((itemDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const parts = item.dueDate.split('-').map(Number);
+    const itemDate =
+      parts.length === 3 && !parts.some(isNaN)
+        ? new Date(parts[0], parts[1] - 1, parts[2])
+        : new Date(item.dueDate);
 
-    if (diffDays <= 0 || item.dueDate === todayStr) {
+    const diffDays = Math.round((itemDate.getTime() - todayLocal.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
       overdueOrToday.push(item);
     } else if (diffDays <= 7) {
       thisWeek.push(item);

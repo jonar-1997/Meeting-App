@@ -19,27 +19,27 @@ export const SAMPLE_MEETINGS: Meeting[] = [
   {
     id: 'sample-sprint-sync',
     title: 'Q4 Core Platform Sprint & Launch Sync',
-    date: '2026-10-12',
+    date: '2026-10-17',
     meetingType: 'sprint',
     userName: 'Alex Rivera',
     userRole: 'Lead Product Engineer',
     attendees: ['Alex Rivera', 'Sarah Chen (Design)', 'Marcus Brody (Backend)', 'David Kim (Product Manager)'],
-    rawNotes: `Product Sync - Oct 12
+    rawNotes: `Product Sync - Oct 17
 Attendees: David, Sarah, Marcus, Alex
 
-- David kicked off talking about the Stripe checkout v3 rollout. Conversions dropped 4% on mobile safari. Alex: I'll audit the mobile viewport CSS and Safari webhook retries by tomorrow 3pm. David says that's top priority.
-- Sarah presented new onboarding flow designs in Figma. Look great. Sarah: "I'll export final SVG icon assets and the design token spec by Thursday EOD."
+- David kicked off talking about the Stripe checkout v3 rollout. Conversions dropped 4% on mobile safari. Alex: I'll audit the mobile viewport CSS and Safari webhook retries by today 5pm. David says that's top priority.
+- Sarah presented new onboarding flow designs in Figma. Look great. Sarah: "I'll export final SVG icon assets and the design token spec by Tuesday EOD."
 - Marcus mentioned database CPU spiked to 88% yesterday during batch sync. "We probably need someone to look into the PostgreSQL connection pool sizing or index missing queries... maybe devops can check?"
-- Alex: I will coordinate with Marcus on the indexing PR and review his migration before it hits staging on Wednesday.
-- Decision: We agreed not to delay the mobile launch. Feature freeze is definitely this Friday Oct 16.
+- Alex: I will coordinate with Marcus on the indexing PR and review his migration before it hits staging on Monday.
+- Decision: We agreed not to delay the mobile launch. Feature freeze is definitely next Friday Oct 23.
 - Someone asked about the GDPR data deletion endpoint audit. Marcus said "Someone should ping the compliance consultant to double check if we need 30-day logs." (Unclear who is doing this).
-- David wants an updated release candidate changelog doc prepared by Alex by Thursday morning before executive standup.`,
+- David wants an updated release candidate changelog doc prepared by Alex by Wednesday morning before executive standup.`,
     summary: {
       executiveSummary: 'Reviewed mobile conversion drop, Q4 onboarding designs, and database performance spikes ahead of the Friday feature freeze.',
       keyOutcomes: [
-        'Confirmed Friday Oct 16 hard feature freeze for Q4 release.',
+        'Confirmed Friday Oct 23 hard feature freeze for Q4 release.',
         'Prioritized mobile Safari checkout fix above all other bug triage.',
-        'Sarah delivering design tokens and SVGs by Thursday.',
+        'Sarah delivering design tokens and SVGs by Tuesday.',
       ],
       unresolvedQuestions: [
         'Who owns contacting the compliance consultant for GDPR log retention?',
@@ -50,13 +50,13 @@ Attendees: David, Sarah, Marcus, Alex
       {
         id: 'ai-sample-1',
         title: 'Audit mobile Safari checkout CSS and webhook retry logic',
-        originalQuote: "Alex: I'll audit the mobile viewport CSS and Safari webhook retries by tomorrow 3pm. David says that's top priority.",
+        originalQuote: "Alex: I'll audit the mobile viewport CSS and Safari webhook retries by today 5pm. David says that's top priority.",
         assignee: 'Alex Rivera',
         isPersonal: true,
         priority: 'high',
         priorityReason: 'Directly impacts 4% conversion drop on mobile checkout; top blocker.',
-        dueDate: '2026-10-13',
-        deadlineLabel: 'Tomorrow at 3:00 PM',
+        dueDate: '2026-10-17',
+        deadlineLabel: 'Today at 5:00 PM',
         status: 'todo',
         effort: 'medium',
         category: 'Engineering',
@@ -66,13 +66,13 @@ Attendees: David, Sarah, Marcus, Alex
       {
         id: 'ai-sample-2',
         title: 'Draft updated release candidate changelog for executive standup',
-        originalQuote: 'David wants an updated release candidate changelog doc prepared by Alex by Thursday morning before executive standup.',
+        originalQuote: 'David wants an updated release candidate changelog doc prepared by Alex by Wednesday morning before executive standup.',
         assignee: 'Alex Rivera',
         isPersonal: true,
         priority: 'high',
-        priorityReason: 'Required for executive sign-off before Thursday morning standup.',
-        dueDate: '2026-10-15',
-        deadlineLabel: 'Thursday 9:00 AM',
+        priorityReason: 'Required for executive sign-off before Wednesday morning standup.',
+        dueDate: '2026-10-21',
+        deadlineLabel: 'Wednesday 9:00 AM',
         status: 'todo',
         effort: 'quick',
         category: 'Product',
@@ -82,13 +82,13 @@ Attendees: David, Sarah, Marcus, Alex
       {
         id: 'ai-sample-3',
         title: 'Review Marcus’s database migration PR before staging deploy',
-        originalQuote: 'Alex: I will coordinate with Marcus on the indexing PR and review his migration before it hits staging on Wednesday.',
+        originalQuote: 'Alex: I will coordinate with Marcus on the indexing PR and review his migration before it hits staging on Monday.',
         assignee: 'Alex Rivera',
         isPersonal: true,
         priority: 'medium',
-        priorityReason: 'Prevents database downtime during staging deployment on Wednesday.',
-        dueDate: '2026-10-14',
-        deadlineLabel: 'Wednesday before Staging Deploy',
+        priorityReason: 'Prevents database downtime during staging deployment on Monday.',
+        dueDate: '2026-10-19',
+        deadlineLabel: 'Monday before Staging Deploy',
         status: 'todo',
         effort: 'quick',
         category: 'Engineering',
@@ -98,13 +98,13 @@ Attendees: David, Sarah, Marcus, Alex
       {
         id: 'ai-sample-4',
         title: 'Export final SVG onboarding icons and design token specs',
-        originalQuote: "Sarah: 'I'll export final SVG icon assets and the design token spec by Thursday EOD.'",
+        originalQuote: "Sarah: 'I'll export final SVG icon assets and the design token spec by Tuesday EOD.'",
         assignee: 'Sarah Chen',
         isPersonal: false,
         priority: 'medium',
         priorityReason: 'Dependencies needed by frontend before feature freeze on Friday.',
-        dueDate: '2026-10-15',
-        deadlineLabel: 'Thursday EOD',
+        dueDate: '2026-10-20',
+        deadlineLabel: 'Tuesday EOD',
         status: 'in_progress',
         effort: 'medium',
         category: 'Design',
@@ -119,8 +119,8 @@ Attendees: David, Sarah, Marcus, Alex
         isPersonal: false,
         priority: 'high',
         priorityReason: 'Database reached 88% CPU peak; risks server crash.',
-        dueDate: '2026-10-14',
-        deadlineLabel: 'Mid-week (Wednesday)',
+        dueDate: '2026-10-20',
+        deadlineLabel: 'Tuesday',
         status: 'todo',
         effort: 'deep',
         category: 'DevOps / DB',
@@ -137,7 +137,7 @@ Attendees: David, Sarah, Marcus, Alex
         isPersonal: false,
         priority: 'low',
         priorityReason: 'Regulatory compliance requirement for EU launch.',
-        dueDate: '2026-10-20',
+        dueDate: '2026-10-27',
         deadlineLabel: 'Next week',
         status: 'todo',
         effort: 'quick',

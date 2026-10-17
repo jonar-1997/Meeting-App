@@ -37,7 +37,8 @@ import {
   Share2, 
   Lightbulb, 
   HelpCircle,
-  Briefcase
+  Briefcase,
+  Mic
 } from 'lucide-react';
 
 export default function App() {
@@ -63,6 +64,8 @@ export default function App() {
   const [newPriority, setNewPriority] = useState<Priority>('medium');
   const [newDueDate, setNewDueDate] = useState('');
   const [newDeadlineLabel, setNewDeadlineLabel] = useState('');
+  const [isNewMeetingDraft, setIsNewMeetingDraft] = useState(false);
+  const [autoStartDictation, setAutoStartDictation] = useState(false);
 
   // Initial load
   useEffect(() => {
@@ -70,6 +73,7 @@ export default function App() {
     const loadedProfile = getUserProfile();
     setMeetings(loadedMeetings);
     setUserProfile(loadedProfile);
+    setNewAssignee(loadedProfile.name);
     if (loadedMeetings.length > 0) {
       setCurrentMeetingId(loadedMeetings[0].id);
     }
@@ -144,7 +148,26 @@ export default function App() {
 
   // Resolve ambiguity modal confirmation
   const handleResolveAmbiguity = (itemId: string, updates: Partial<ActionItem>) => {
-    handleUpdateItem(itemId, updates);
+    if (!currentMeeting) return;
+    const targetItem = currentMeeting.actionItems.find((i) => i.id === itemId);
+    const updatedItems = currentMeeting.actionItems.map((item) =>
+      item.id === itemId ? { ...item, ...updates } : item
+    );
+    const updatedAmbiguities = currentMeeting.ambiguities.map((amb) => {
+      if (targetItem && amb.issue.toLowerCase().includes(targetItem.title.slice(0, 15).toLowerCase())) {
+        return { ...amb, resolved: true, resolvedOwner: updates.assignee };
+      }
+      return amb;
+    });
+
+    const updatedMeeting: Meeting = {
+      ...currentMeeting,
+      actionItems: updatedItems,
+      ambiguities: updatedAmbiguities,
+      updatedAt: new Date().toISOString(),
+    };
+
+    updateMeetings(meetings.map((m) => (m.id === updatedMeeting.id ? updatedMeeting : m)));
     showToast('Verified! Ambiguity resolved & owner locked.');
   };
 
@@ -152,6 +175,7 @@ export default function App() {
   const handleSaveUserProfile = (profile: UserProfile) => {
     setUserProfile(profile);
     saveUserProfile(profile);
+    setNewAssignee(profile.name);
 
     // Update isPersonal flags across current meeting
     if (currentMeeting) {
@@ -255,8 +279,9 @@ export default function App() {
       setMeetings(updated);
       saveStoredMeetings(updated);
       setCurrentMeetingId(newMeetingId);
+      setIsNewMeetingDraft(false);
       setActiveTab('checklist');
-      showToast('Meeting notes successfully transformed into verified action items!');
+      showToast(result.warning || 'Meeting notes successfully transformed into verified action items!');
     } catch (err: any) {
       console.error('Failed to analyze notes:', err);
       showToast('Could not process notes. Please check connection and try again.');
@@ -267,6 +292,7 @@ export default function App() {
 
   // Create new blank meeting
   const handleStartNewMeeting = () => {
+    setIsNewMeetingDraft(true);
     setActiveTab('input');
   };
 
@@ -497,7 +523,10 @@ export default function App() {
 
             <button
               type="button"
-              onClick={() => setActiveTab('input')}
+              onClick={() => {
+                setIsNewMeetingDraft(false);
+                setActiveTab('input');
+              }}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
                 activeTab === 'input'
                   ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
@@ -506,6 +535,20 @@ export default function App() {
             >
               <FileText className="w-4 h-4" />
               Raw Notes & Ingestion
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsNewMeetingDraft(false);
+                setActiveTab('input');
+                setAutoStartDictation(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 ml-auto cursor-pointer"
+              title="Open microphone and dictate meeting notes into the scratchpad in real time"
+            >
+              <Mic className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              Voice Dictate
             </button>
           </div>
         </div>
@@ -853,14 +896,16 @@ export default function App() {
         {/* Tab 4: Raw Notes Ingestion */}
         {activeTab === 'input' && (
           <NotesInput
-            initialTitle={currentMeeting.title}
-            initialNotes={currentMeeting.rawNotes}
-            initialDate={currentMeeting.date}
-            initialType={currentMeeting.meetingType}
-            initialAttendees={currentMeeting.attendees}
+            initialTitle={isNewMeetingDraft ? '' : currentMeeting.title}
+            initialNotes={isNewMeetingDraft ? '' : currentMeeting.rawNotes}
+            initialDate={isNewMeetingDraft ? new Date().toISOString().split('T')[0] : currentMeeting.date}
+            initialType={isNewMeetingDraft ? 'sync' : currentMeeting.meetingType}
+            initialAttendees={isNewMeetingDraft ? [userProfile.name] : currentMeeting.attendees}
             userName={userProfile.name}
             userRole={userProfile.role}
             isProcessing={isProcessing}
+            autoStartDictation={autoStartDictation}
+            onDictationStarted={() => setAutoStartDictation(false)}
             onAnalyze={handleAnalyzeNotes}
           />
         )}

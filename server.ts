@@ -12,13 +12,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '25mb' }));
 
 // Initialize Google GenAI client (server-side only)
-const apiKey = process.env.GEMINI_API_KEY;
-let ai: GoogleGenAI | null = null;
-if (apiKey) {
-  ai = new GoogleGenAI({
+function getGenAI(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({
     apiKey,
     httpOptions: {
       headers: {
@@ -52,6 +52,7 @@ app.post('/api/analyze-notes', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Meeting notes text is required' });
     }
 
+    const ai = getGenAI();
     if (!ai) {
       // Intelligent mock/heuristic fallback if API key is not yet configured
       return res.json(generateFallbackAnalysis(rawNotes, title, userName, currentDate));
@@ -187,7 +188,7 @@ Analyze these notes and return the structured JSON data strictly conforming to t
                     items: { type: Type.STRING },
                   },
                 },
-                required: ['title', 'assignee', 'isPersonal', 'priority', 'status' in {} ? 'status' : 'title'],
+                required: ['title', 'assignee', 'isPersonal', 'priority'],
               },
             },
             decisions: {
@@ -225,7 +226,11 @@ Analyze these notes and return the structured JSON data strictly conforming to t
       throw new Error('Gemini returned an empty response');
     }
 
-    const parsed = JSON.parse(textOutput);
+    const cleanedJson = textOutput
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+    const parsed = JSON.parse(cleanedJson);
 
     // Format and sanitize items
     const actionItemsWithIds = (parsed.actionItems || []).map((item: any, idx: number) => ({
@@ -293,6 +298,7 @@ app.post('/api/suggest-clarification', async (req: Request, res: Response) => {
   try {
     const { taskTitle, ambiguityReason, meetingTitle, recipientName = 'the team' } = req.body;
 
+    const ai = getGenAI();
     if (!ai) {
       return res.json({
         message: `Hi ${recipientName}! Following up on ${meetingTitle || 'our meeting'}: for "${taskTitle}", could we clarify ownership and next steps? Thanks!`,
@@ -320,6 +326,67 @@ Return ONLY the ready-to-copy message text. Keep it friendly, clear, and under 3
     return res.json({
       message: `Hi there, just wanted to check on "${req.body.taskTitle}" from our sync. Could we confirm who has ownership and target date?`,
     });
+  }
+});
+
+// Endpoint: Real-time audio chunk transcription via Gemini with quota-resilient model cascade
+app.post('/api/transcribe', async (req: Request, res: Response) => {
+  try {
+    const { audioBase64, mimeType = 'audio/webm' } = req.body;
+    if (!audioBase64 || typeof audioBase64 !== 'string') {
+      return res.status(400).json({ error: 'Audio data is required' });
+    }
+
+    const ai = getGenAI();
+    if (!ai) {
+      return res.json({ transcript: '' });
+    }
+
+    const cleanMime = mimeType.split(';')[0].trim() || 'audio/webm';
+    const audioPart = {
+      inlineData: {
+        mimeType: cleanMime,
+        data: audioBase64,
+      },
+    };
+
+    const promptText =
+      'Transcribe this spoken meeting note accurately into plain text. Return ONLY the exact spoken words without quotes, prefixes, or commentary. If the audio contains only silence, breathing, or background noise with no speech, return an empty string.';
+
+    const candidateModels = [
+      'gemini-3.8-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-3.5-transcribe',
+    ];
+
+    for (const modelName of candidateModels) {
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: {
+            parts: [audioPart, { text: promptText }],
+          },
+        });
+        const transcript = (response.text || '').trim();
+        return res.json({ transcript });
+      } catch (modelErr: any) {
+        const msg = String(modelErr?.message || modelErr || '');
+        const isQuotaOrRateLimit =
+          modelErr?.status === 429 ||
+          msg.includes('429') ||
+          msg.includes('RESOURCE_EXHAUSTED') ||
+          msg.includes('Quota exceeded');
+        if (isQuotaOrRateLimit) {
+          // Try next model in cascade
+          continue;
+        }
+        break;
+      }
+    }
+
+    return res.json({ transcript: '', rateLimited: true, retryAfterMs: 15000 });
+  } catch {
+    return res.json({ transcript: '' });
   }
 });
 

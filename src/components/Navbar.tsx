@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">
                   <Sparkles className="w-2.5 h-2.5" />
-                  Gemini 3.8
+                  AI Verified
                 </span>
               </div>
               <p className="hidden md:block text-[11px] text-zinc-500 dark:text-zinc-400 font-medium -mt-0.5">
