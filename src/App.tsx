@@ -11,6 +11,8 @@ import {
   saveStoredMeetings, 
   getUserProfile, 
   saveUserProfile, 
+  getWelcomeDismissed,
+  saveWelcomeDismissed,
   UserProfile, 
   DEFAULT_USER_PROFILE 
 } from './services/storage';
@@ -21,6 +23,7 @@ import { DeadlineTimeline } from './components/DeadlineTimeline';
 import { ExportModal } from './components/ExportModal';
 import { AmbiguityResolverModal } from './components/AmbiguityResolverModal';
 import { UserProfileModal } from './components/UserProfileModal';
+import { WelcomeGuide } from './components/WelcomeGuide';
 import { 
   CheckSquare, 
   User, 
@@ -52,10 +55,11 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Modals state
+  // Modals & Welcome state
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [ambiguityModalItem, setAmbiguityModalItem] = useState<ActionItem | null>(null);
+  const [showWelcome, setShowWelcome] = useState<boolean>(() => !getWelcomeDismissed());
 
   // New manual item form state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -360,10 +364,39 @@ export default function App() {
         onNewMeeting={handleStartNewMeeting}
         onOpenExport={() => setIsExportOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenWelcome={() => {
+          setShowWelcome(true);
+          saveWelcomeDismissed(false);
+        }}
         userProfile={userProfile}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Welcome Guide for First-Time Users */}
+        {showWelcome && (
+          <WelcomeGuide
+            userName={userProfile.name}
+            onStartRecording={() => {
+              setIsNewMeetingDraft(false);
+              setActiveTab('input');
+              setAutoStartDictation(true);
+            }}
+            onSetMeetingDetails={() => {
+              setIsNewMeetingDraft(false);
+              setActiveTab('input');
+            }}
+            onGenerateChecklist={() => {
+              setIsNewMeetingDraft(false);
+              setActiveTab('input');
+            }}
+            onOpenProfile={() => setIsProfileOpen(true)}
+            onDismiss={() => {
+              setShowWelcome(false);
+              saveWelcomeDismissed(true);
+            }}
+          />
+        )}
+
         {/* Meeting Header Banner */}
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 p-6 sm:p-7 shadow-xs mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">

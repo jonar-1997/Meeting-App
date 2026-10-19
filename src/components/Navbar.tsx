@@ -9,7 +9,8 @@ import {
   ChevronDown, 
   Sparkles,
   Layers,
-  History
+  History,
+  HelpCircle
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -19,6 +20,7 @@ interface NavbarProps {
   onNewMeeting: () => void;
   onOpenExport: () => void;
   onOpenProfile: () => void;
+  onOpenWelcome: () => void;
   userProfile: UserProfile;
 }
 
@@ -29,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNewMeeting,
   onOpenExport,
   onOpenProfile,
+  onOpenWelcome,
   userProfile,
 }) => {
   return (
@@ -85,6 +88,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Action Tools */}
           <div className="flex items-center gap-2">
+            {/* Welcome Guide Button */}
+            <button
+              type="button"
+              onClick={onOpenWelcome}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors cursor-pointer"
+              title="Show Welcome & Getting Started Guide"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span className="hidden sm:inline">Guide</span>
+            </button>
+
             {/* Identity Switcher Button */}
             <button
               type="button"

@@ -2,6 +2,7 @@ import { Meeting } from '../types';
 
 const STORAGE_KEY = 'actiondraft_meetings_v1';
 const USER_PROFILE_KEY = 'actiondraft_user_profile_v1';
+const WELCOME_DISMISSED_KEY = 'actiondraft_welcome_dismissed_v1';
 
 export interface UserProfile {
   name: string;
@@ -265,5 +266,25 @@ export function saveUserProfile(profile: UserProfile): void {
     localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
   } catch (err) {
     console.error('Failed to save user profile:', err);
+  }
+}
+
+export function getWelcomeDismissed(): boolean {
+  try {
+    return localStorage.getItem(WELCOME_DISMISSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function saveWelcomeDismissed(dismissed: boolean): void {
+  try {
+    if (dismissed) {
+      localStorage.setItem(WELCOME_DISMISSED_KEY, 'true');
+    } else {
+      localStorage.removeItem(WELCOME_DISMISSED_KEY);
+    }
+  } catch (err) {
+    console.error('Failed to save welcome state:', err);
   }
 }
